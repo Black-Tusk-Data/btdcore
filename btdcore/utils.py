@@ -7,6 +7,18 @@ from typing import Any, Callable, Iterable, Type, TypeVar, Union
 primitives = (bool, str, int, float, type(None))
 
 
+def scrub_title_key(d: dict):
+    """
+    Helpful because pydantic schema dumps include an unecessary 'title' attribute;
+    """
+    d.pop("title", None)
+    if d.get("type") == "object":
+        assert "properties" in d
+        for prop in d["properties"].keys():
+            scrub_title_key(d["properties"][prop])
+    return d
+
+
 def is_primitive(obj):
     return isinstance(obj, primitives)
 

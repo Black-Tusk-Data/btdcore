@@ -8,7 +8,7 @@ import urllib.parse
 import requests
 
 
-class RestClientBase(abc.ABC):
+class RestClientBase:
     def __init__(
         self,
         base: str,
