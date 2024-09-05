@@ -32,9 +32,9 @@ def parse_data(data: dict):
         if key == "NULL":
             return val
         else:
-            logging.error("UNKNOWN KEY:", key, "WITH VAL:", val, data)
+            logging.error("UNKNOWN KEY: %s WITH VAL: %s IN OBJ %s", key, val, data)
     except Exception as e:
-        logging.error("caught error:", e)
+        logging.error("caught error: %s", e)
     return
 
 
@@ -71,7 +71,7 @@ class TableCon:
         key_expr: str,
         values: dict,
         exp_attr_names: Optional[dict] = None,
-        index_name: str = None,
+        index_name: str | None = None,
     ):
         req = {
             "TableName": self.table_name,
@@ -124,7 +124,7 @@ class TableCon:
         notify_progress = (page_size / item_count) < 0.1
         last_p_notify = 0
         if notify_progress:
-            logging.info("fetching", item_count, "records")
+            logging.info("fetching %d records", item_count)
         rows = []
         res = self.dbcon.scan(
             TableName=self.table_name,
