@@ -7,6 +7,13 @@ from typing import Any, Callable, Iterable, Type, TypeVar, Union
 primitives = (bool, str, int, float, type(None))
 
 
+def batched(xs: list, batch_size: int) -> list[list]:
+    return [
+        xs[i:i + batch_size]
+        for i in range(0, len(xs), batch_size)
+    ]
+
+
 def scrub_title_key(d: dict):
     """
     Helpful because pydantic schema dumps include an unecessary 'title' attribute;
