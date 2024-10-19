@@ -6,8 +6,8 @@ from setuptools import find_packages, setup
 
 setup(
     name="btdcore",
-    version="v0.1.0",
-    description="Core Python library for Black Tusk Data",
+    version="v0.1.2",
+    description="Core Python library for BlackTuskData",
     author="Liam Tengelis",
     author_email="liam.tengelis@blacktuskdata.com",
     packages=find_packages(),
