@@ -1,4 +1,6 @@
 import abc
+import base64
+import hashlib
 import sys
 import traceback
 from typing import Any, Callable, Iterable, Type, TypeVar, Union
@@ -114,3 +116,9 @@ def concurrently(*fns) -> list:
         return fn()
 
     return map_multithreaded(call, fns, len(fns))
+
+
+def md5_b64_str(contents: str) -> str:
+    result = hashlib.md5(contents.encode("utf-8"))
+    digest = result.digest()
+    return base64.b64encode(digest).decode("utf-8")

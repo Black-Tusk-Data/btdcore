@@ -113,6 +113,22 @@ class TableCon:
             Key=key,
         )
 
+    def update_item(
+            self,
+            *,
+            key: dict,
+            update_expr: str,
+            attribute_values: dict,
+    ):
+        result = self.dbcon.update_item(
+            TableName=self.table_name,
+            Key=key,
+            UpdateExpression=update_expr,
+            ExpressionAttributeValues=attribute_values,
+            # ReturnValues="UPDATED_NEW"
+        )
+        return
+
     def describe_table(self):
         return self.dbcon.describe_table(TableName=self.table_name)
 
