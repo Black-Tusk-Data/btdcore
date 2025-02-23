@@ -1,10 +1,11 @@
 import json
+import time
+from uuid import uuid4
 from urllib.parse import quote_plus
 
 from btdcore.aws.core import AwsServiceSession
 from btdcore.rest_client_base import PersistableRequestMetadata, RequestPersister
 from btdcore.utils import map_multithreaded
-
 
 
 class S3RequestPersister(RequestPersister):
@@ -18,10 +19,8 @@ class S3RequestPersister(RequestPersister):
 
     def _persist_single(self, req_metadata: PersistableRequestMetadata) -> None:
         key = "/".join(map(quote_plus, [
-            req_metadata.host,
-            f"{req_metadata.method} {req_metadata.path}",
             req_metadata.response_at_ts.strftime("%Y-%m-%d"),
-            req_metadata.response_at_ts.isoformat(),
+            f"{int(time.time())}-{uuid4()}",
         ]))
         self.s3.service.put_object(
             Bucket=self.bucket_name,
