@@ -1,6 +1,7 @@
 import abc
 from collections import deque
 from datetime import datetime
+import json
 import logging
 import multiprocessing
 import threading
@@ -18,7 +19,7 @@ class PersistableRequestMetadata(NamedTuple):
     duration_seconds: float
     method: str
     path: str
-    kwargs: dict
+    kwargs_json: str
     response_content: str
     response_status: int
     response_at_ts: datetime
@@ -85,7 +86,7 @@ class RestClientBase:
             duration_seconds=duration,
             method=method,
             path=path,
-            kwargs=kwargs,
+            kwargs_json=json.dumps(kwargs),
             response_at_ts=datetime.now(),
             response_content=response.text,
             response_status=response.status_code,
@@ -116,8 +117,13 @@ class RestClientBase:
         url = f"{self.base}{path}"
         self._wait_turn_for_request()
         t0 = time.time()
+        logging.info("SEND %s %s", method, url)
         res = self.session.request(method, url, **kwargs)
         t1 = time.time()
+        logging.info(
+            "RECEIVE %s %s - %d seconds",
+            method, url, round(t1 - t0, 2),
+        )
         self._q_req_for_persistence(
             duration=t1-t0,
             method=method,
