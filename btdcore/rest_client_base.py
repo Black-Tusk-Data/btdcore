@@ -20,9 +20,17 @@ class PersistableRequestMetadata(NamedTuple):
     method: str
     path: str
     kwargs_json: str
+    request_headers: dict[str, str]
+    response_headers: dict[str, str]
     response_content: str
     response_status: int
     response_at_ts: datetime
+
+    def to_json(self) -> str:
+        return json.dumps({
+            **self._asdict(),
+            "response_at_ts": self.response_at_ts.isoformat(),
+        })
     pass
 
 
@@ -87,6 +95,8 @@ class RestClientBase:
             method=method,
             path=path,
             kwargs_json=json.dumps(kwargs),
+            request_headers=kwargs.get("headers", {}),
+            response_headers=dict(response.headers),
             response_at_ts=datetime.now(),
             response_content=response.text,
             response_status=response.status_code,
@@ -117,12 +127,12 @@ class RestClientBase:
         url = f"{self.base}{path}"
         self._wait_turn_for_request()
         t0 = time.time()
-        logging.info("SEND %s %s", method, url)
+        logging.debug("SEND %s %s", method, url)
         res = self.session.request(method, url, **kwargs)
         t1 = time.time()
-        logging.info(
-            "RECEIVE %s %s - %d seconds",
-            method, url, round(t1 - t0, 2),
+        logging.debug(
+            "RECEIVE %s %s - %.2f seconds",
+            method, url, t1 - t0,
         )
         self._q_req_for_persistence(
             duration=t1-t0,

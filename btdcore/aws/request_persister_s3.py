@@ -8,7 +8,7 @@ from btdcore.rest_client_base import PersistableRequestMetadata, RequestPersiste
 from btdcore.utils import map_multithreaded
 
 
-class S3RequestPersister(RequestPersister):
+class RequestPersisterS3(RequestPersister):
     def __init__(
             self,
             bucket_name: str
@@ -25,10 +25,7 @@ class S3RequestPersister(RequestPersister):
         self.s3.service.put_object(
             Bucket=self.bucket_name,
             Key=key,
-            Body=json.dumps({
-                **req_metadata._asdict(),
-                "response_at_ts": req_metadata.response_at_ts.isoformat(),
-            }).encode("utf-8")
+            Body=req_metadata.to_json().encode("utf-8")
         )
         return
 
