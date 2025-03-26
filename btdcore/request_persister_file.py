@@ -4,10 +4,7 @@ from btdcore.rest_client_base import PersistableRequestMetadata, RequestPersiste
 
 
 class RequestPersisterFile(RequestPersister):
-    def __init__(
-            self,
-            file_name: str
-    ):
+    def __init__(self, file_name: str):
         self.file_path = Path(file_name)
         self.file_path.mkdir(parents=True, exist_ok=True)
         return

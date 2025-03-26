@@ -27,10 +27,13 @@ class PersistableRequestMetadata(NamedTuple):
     response_at_ts: datetime
 
     def to_json(self) -> str:
-        return json.dumps({
-            **self._asdict(),
-            "response_at_ts": self.response_at_ts.isoformat(),
-        })
+        return json.dumps(
+            {
+                **self._asdict(),
+                "response_at_ts": self.response_at_ts.isoformat(),
+            }
+        )
+
     pass
 
 
@@ -38,6 +41,7 @@ class RequestPersister(abc.ABC):
     @abc.abstractmethod
     def persist(self, batch: list[PersistableRequestMetadata]):
         pass
+
     pass
 
 
@@ -59,8 +63,7 @@ class RestClientBase:
         self.rate_limit_window_seconds = rate_limit_window_seconds
         self.rate_limit_requests = rate_limit_requests
         self._REQ_HISTORY_LOCK = (
-            threading.Lock() if lock_type == "thread"
-            else multiprocessing.Lock()
+            threading.Lock() if lock_type == "thread" else multiprocessing.Lock()
         )
         self._REQ_HISTORY: deque[float] = deque([])
         self.session = requests.Session()
@@ -79,28 +82,30 @@ class RestClientBase:
         )
 
     def _q_req_for_persistence(
-            self,
-            *,
-            duration: float,
-            method: str,
-            path: str,
-            kwargs: dict,
-            response: requests.models.Response
+        self,
+        *,
+        duration: float,
+        method: str,
+        path: str,
+        kwargs: dict,
+        response: requests.models.Response,
     ) -> None:
         if not self.request_persister:
             return
-        self.persist_q.append(PersistableRequestMetadata(
-            host=self.base,
-            duration_seconds=duration,
-            method=method,
-            path=path,
-            kwargs_json=json.dumps(kwargs),
-            request_headers=kwargs.get("headers", {}),
-            response_headers=dict(response.headers),
-            response_at_ts=datetime.now(),
-            response_content=response.text,
-            response_status=response.status_code,
-        ))
+        self.persist_q.append(
+            PersistableRequestMetadata(
+                host=self.base,
+                duration_seconds=duration,
+                method=method,
+                path=path,
+                kwargs_json=json.dumps(kwargs),
+                request_headers=kwargs.get("headers", {}),
+                response_headers=dict(response.headers),
+                response_at_ts=datetime.now(),
+                response_content=response.text,
+                response_status=response.status_code,
+            )
+        )
         if len(self.persist_q) >= self.REQ_PERSIST_BATCH_SIZE:
             self.request_persister.persist(list(self.persist_q))
             self.persist_q = deque()
@@ -132,10 +137,12 @@ class RestClientBase:
         t1 = time.time()
         logging.debug(
             "RECEIVE %s %s - %.2f seconds",
-            method, url, t1 - t0,
+            method,
+            url,
+            t1 - t0,
         )
         self._q_req_for_persistence(
-            duration=t1-t0,
+            duration=t1 - t0,
             method=method,
             path=path,
             kwargs=kwargs,

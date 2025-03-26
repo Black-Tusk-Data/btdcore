@@ -114,11 +114,11 @@ class TableCon:
         )
 
     def update_item(
-            self,
-            *,
-            key: dict,
-            update_expr: str,
-            attribute_values: dict,
+        self,
+        *,
+        key: dict,
+        update_expr: str,
+        attribute_values: dict,
     ):
         result = self.dbcon.update_item(
             TableName=self.table_name,
