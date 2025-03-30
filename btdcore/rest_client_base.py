@@ -19,8 +19,7 @@ class PersistableRequestMetadata(NamedTuple):
     duration_seconds: float
     method: str
     path: str
-    kwargs_json: str
-    request_headers: dict[str, str]
+    kwargs: dict
     response_headers: dict[str, str]
     response_content: str
     response_status: int
@@ -31,7 +30,8 @@ class PersistableRequestMetadata(NamedTuple):
             {
                 **self._asdict(),
                 "response_at_ts": self.response_at_ts.isoformat(),
-            }
+            },
+            default=str,
         )
 
     pass
@@ -98,8 +98,7 @@ class RestClientBase:
                 duration_seconds=duration,
                 method=method,
                 path=path,
-                kwargs_json=json.dumps(kwargs),
-                request_headers=kwargs.get("headers", {}),
+                kwargs=kwargs,
                 response_headers=dict(response.headers),
                 response_at_ts=datetime.now(),
                 response_content=response.text,
