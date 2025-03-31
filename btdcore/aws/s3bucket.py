@@ -67,6 +67,18 @@ class S3Bucket:
             raise e
         return b"".join(list(r["Body"]))
 
+    def get_signed_download_url(
+            self,
+            key: str
+    ) -> str:
+        return s3.service.generate_presigned_url(
+            ClientMethod="get_object",
+            Params={
+                "Bucket": self.bucket_name,
+                "Key": key,
+            }
+        )
+
     def key_exists(self, key: str) -> bool:
         try:
             s3.service.head_object(Bucket=self.bucket_name, Key=key)
