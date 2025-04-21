@@ -8,19 +8,16 @@ from btdcore.aws.core import AwsServiceSession
 
 s3 = AwsServiceSession("s3")
 
+
 class S3Bucket:
-    def __init__(
-            self,
-            *,
-            bucket_name: str
-    ):
+    def __init__(self, *, bucket_name: str):
         self.bucket_name = bucket_name
         return
 
     def list_keys(
-            self,
-            *,
-            prefix: str | None = None,
+        self,
+        *,
+        prefix: str | None = None,
     ) -> Iterable[str]:
         kwargs = {
             "Bucket": self.bucket_name,
@@ -39,10 +36,10 @@ class S3Bucket:
         return
 
     def write_to_key(
-            self,
-            *,
-            key: str,
-            contents: bytes,
+        self,
+        *,
+        key: str,
+        contents: bytes,
     ):
         return s3.service.put_object(
             Bucket=self.bucket_name,
@@ -67,16 +64,13 @@ class S3Bucket:
             raise e
         return b"".join(list(r["Body"]))
 
-    def get_signed_download_url(
-            self,
-            key: str
-    ) -> str:
+    def get_signed_download_url(self, key: str) -> str:
         return s3.service.generate_presigned_url(
             ClientMethod="get_object",
             Params={
                 "Bucket": self.bucket_name,
                 "Key": key,
-            }
+            },
         )
 
     def key_exists(self, key: str) -> bool:
@@ -84,9 +78,9 @@ class S3Bucket:
             s3.service.head_object(Bucket=self.bucket_name, Key=key)
             return True
         except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == "404":
+            if e.response["Error"]["Code"] == "404":
                 return False
-            elif e.response['Error']['Code'] == 403:
+            elif e.response["Error"]["Code"] == 403:
                 return False
             else:
                 raise e

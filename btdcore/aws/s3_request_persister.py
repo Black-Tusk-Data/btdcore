@@ -9,26 +9,30 @@ from btdcore.utils import map_multithreaded
 
 
 class S3RequestPersister(RequestPersister):
-    def __init__(
-            self,
-            bucket_name: str
-    ):
+    def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
         self.s3 = AwsServiceSession("s3")
         return
 
     def _persist_single(self, req_metadata: PersistableRequestMetadata) -> None:
-        key = "/".join(map(quote_plus, [
-            req_metadata.response_at_ts.strftime("%Y-%m-%d"),
-            f"{int(time.time())}-{uuid4()}",
-        ]))
+        key = "/".join(
+            map(
+                quote_plus,
+                [
+                    req_metadata.response_at_ts.strftime("%Y-%m-%d"),
+                    f"{int(time.time())}-{uuid4()}",
+                ],
+            )
+        )
         self.s3.service.put_object(
             Bucket=self.bucket_name,
             Key=key,
-            Body=json.dumps({
-                **req_metadata._asdict(),
-                "response_at_ts": req_metadata.response_at_ts.isoformat(),
-            }).encode("utf-8")
+            Body=json.dumps(
+                {
+                    **req_metadata._asdict(),
+                    "response_at_ts": req_metadata.response_at_ts.isoformat(),
+                }
+            ).encode("utf-8"),
         )
         return
 
