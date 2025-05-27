@@ -11,7 +11,7 @@ import urllib.parse
 
 import requests
 
-LockType = Literal["multiprocessing", "thread"]
+LockType = Literal["multiprocessing", "threading"]
 
 
 class PersistableRequestMetadata(NamedTuple):
@@ -56,14 +56,14 @@ class RestClientBase:
         headers: dict[str, str] | None = None,
         rate_limit_window_seconds: int | None = None,
         rate_limit_requests: int | None = None,
-        lock_type: LockType = "thread",
+        lock_type: LockType = "threading",
         request_persister: RequestPersister | None = None,
     ):
         self.base = base
         self.rate_limit_window_seconds = rate_limit_window_seconds
         self.rate_limit_requests = rate_limit_requests
         self._REQ_HISTORY_LOCK = (
-            threading.Lock() if lock_type == "thread" else multiprocessing.Lock()
+            threading.Lock() if lock_type == "threading" else multiprocessing.Lock()
         )
         self._REQ_HISTORY: deque[float] = deque([])
         self.session = requests.Session()
@@ -119,9 +119,11 @@ class RestClientBase:
         with self._REQ_HISTORY_LOCK:
             while self._REQ_HISTORY and self._REQ_HISTORY[0] < cutoff:
                 self._REQ_HISTORY.popleft()
+                pass
             if len(self._REQ_HISTORY) < self.rate_limit_requests:
                 self._REQ_HISTORY.append(now)
                 return
+            pass
         # otherwise, too many in-flight requests
         time.sleep(self.rate_limit_window_seconds)
         self._wait_turn_for_request()
